@@ -7,6 +7,7 @@ exports.protect = async (req, res, next)=>{
     let authorized = false;
     let token;
     let user_id;
+    let user;
 
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer'))
     {
@@ -18,6 +19,8 @@ exports.protect = async (req, res, next)=>{
         return next(new Error('Unauthorized Access.'));
     }
 
+    console.log(process.env.JWT_SECRET_KEY);
+
     try{
         user_id = await jwt.verify(token, process.env.JWT_SECRET_KEY);
     }catch(e)
@@ -25,5 +28,17 @@ exports.protect = async (req, res, next)=>{
         return next(e);
     }
 
+    let query = "SELECT * FROM users WHERE id = $1";
+    let values = [user_id];
 
+    try{
+        user = await client.query(query, values);
+    }catch(e)
+    {
+        return next(e);
+    }
+
+    req.user = user.rows[0];
+
+    next();
 }

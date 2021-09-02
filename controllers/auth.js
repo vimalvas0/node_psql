@@ -41,6 +41,11 @@ exports.login = async (req, res, next)=>{
     try{
         const userAdded = await client.query(query, values);
         const result = userAdded.rows[0];
+
+        if(!result)
+        {
+            return next(new Error('This username is not registered.'));
+        }
         if(result.password != password)
         {
             return next(new Error('Your password is incorrect.'));
@@ -52,7 +57,19 @@ exports.login = async (req, res, next)=>{
     {
         return next(e);
     }
+}
 
+
+exports.logout = (req, res, next)=>{
+    res.cookie('token', '', {
+        expires : new Date(Date.now() + 5 * 1000),
+        httpOnly : true
+    });
+
+    return res.status(200).json({
+        "status" : "successful",
+        "message" : "You are logged out successfully"
+    });
 }
 
 
@@ -70,7 +87,6 @@ async function getJWT(result, status, res){
 
     // console.log(result.id);
     // console.log(process.env.JWT_SECRET_KEY);
-
     // console.log(result.id);
 
     const token = await jwt.sign(
@@ -81,7 +97,7 @@ async function getJWT(result, status, res){
     console.log(token);
 
     return res.status(status)
-    .cookie('token', 'Bearer ' + token, option2)
+    .cookie('token',token, option2)
     .json({
         "status" : "successful",
         "user" : result,
