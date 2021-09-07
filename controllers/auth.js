@@ -3,7 +3,9 @@ const client = require('../models/db.js');
 const {v4: uuidv4} = require('uuid');
 
 
-// Controller for soving siging up[ option
+//  DEFINE > singup()
+// __@params : 
+
 exports.signUp = async (req, res, next)=>{
     const {username, password} = req.body;
     // console.log(username, password);
@@ -17,12 +19,10 @@ exports.signUp = async (req, res, next)=>{
         const result = userAdded.rows[0];
         // console.log(result.data.id);
        return await getJWT(result, 200, res);
-
     }catch(e)
     {
         return next(e);
     }
-
 }
 
 
@@ -58,6 +58,8 @@ exports.login = async (req, res, next)=>{
         return next(e);
     }
 }
+
+
 
 
 exports.logout = (req, res, next)=>{
